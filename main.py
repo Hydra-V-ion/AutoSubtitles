@@ -24,9 +24,9 @@ def convertTime(secBrut):
 
 
 #Petite vérification
-if len(sys.argv) < 3:
+if len(sys.argv) < 4:
     print("Erreur : Il manque des paramètres")
-    print("Utilisation : python3 main.py 'vidéo_source' 'vidéo_sortie'")
+    print("Utilisation : python3 main.py 'vidéo_source' 'vidéo_sortie' 'modèle'")
     sys.exit()
 
 
@@ -35,10 +35,11 @@ if len(sys.argv) < 3:
 #Les vidéos d'entrée et de sortie
 source = sys.argv[1]
 sortie = sys.argv[2]
+model = sys.argv[3]
 
 
 #Importation du modèle
-model = whisper.load_model("small")
+model = whisper.load_model(model)
 print("Le modèle est prêt")
 
 
