@@ -46,7 +46,7 @@ print("Le modèle est prêt")
 
 
 #Transcription de l'audio en texte
-out = model.transcribe(source)
+out = model.transcribe(source, word_timestamps=True)
 if len(out["segments"]) == 0:
     print("Erreur : Aucune parole détectée dans la vidéo.")
     sys.exit()
@@ -55,19 +55,48 @@ if len(out["segments"]) == 0:
 
 
 #Fonction pour créer le fichier .srt
+id = 1
+max_chars = 10
 with open("subtitles.srt", "w", encoding="utf-8") as f:
     for segment in out["segments"]:
-        id = segment["id"] + 1
-        timeStart = convertTime(segment["start"])
-        timeEnd = convertTime(segment["end"])
+        bufferText = ""
+        bufferStart = 0.0
 
-        text = f"{id}\n{timeStart} --> {timeEnd}\n{segment['text'].strip()}\n\n"
-        f.write(text)
+        for word_data in segment["words"]:
+            mot = word_data["word"].strip()
+
+            #Capture du temps de départ si le buffer est vide
+            if bufferText == "":
+                bufferStart = word_data["start"]
+
+            #Gestion des espaces
+            if bufferText != "" and not bufferText.endswith("'") and not bufferText.endswith("'"):
+                bufferText += " "
+
+            bufferText += mot
+
+            #Déclenchement de l'écriture
+            if len(bufferText) >= max_chars or mot.endswith((".", "!", "?")):
+                timeStart = convertTime(bufferStart)
+                timeEnd = convertTime(word_data["end"])
+
+                text = f"{id}\n{timeStart} --> {timeEnd}\n{bufferText.strip()}\n\n"
+                f.write(text)
+                id += 1
+                bufferText = ""
+            
+        if bufferText != "":
+            timeStart = convertTime(bufferStart)
+            timeEnd = convertTime(word_data["end"])
+
+            text = f"{id}\n{timeStart} --> {timeEnd}\n{bufferText.strip()}\n\n"
+            f.write(text)
+            id += 1
 
 
 
 
 
 #Utilisation de FFmpeg
-commande = ["ffmpeg", "-y", "-i", source, "-vf", "subtitles=subtitles.srt", sortie]
+commande = ["ffmpeg", "-y", "-i", source, "-vf", "subtitles=subtitles.srt", "-c:v", "libx264", "-crf", "18", sortie]
 subprocess.run(commande)

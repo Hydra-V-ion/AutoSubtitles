@@ -2,3 +2,4 @@ venv_whisper/
 *.Identifier
 *.mp4
 *.srt
+*.txt
