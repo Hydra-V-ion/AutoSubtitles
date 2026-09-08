@@ -70,7 +70,7 @@ with open("subtitles.srt", "w", encoding="utf-8") as f:
                 bufferStart = word_data["start"]
 
             #Gestion des espaces
-            if bufferText != "" and not bufferText.endswith("'") and not bufferText.endswith("'"):
+            if bufferText != "" and not bufferText.endswith(("'", "`")) and not mot.startswith(("'", "`")):
                 bufferText += " "
 
             bufferText += mot
